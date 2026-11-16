@@ -8,6 +8,18 @@ Apple's hang floor is `250 ms`. An Android `ANR` is a separate `~5,000 ms` OS ti
 
 **MIT open source** — desk studio, CLI, MCP, inbox, gate, and device watchdogs. Every command is free. See [ADR 0003](docs/adr/0003-mit-open-source.md).
 
+<p align="center">
+  <img src="assets/screenshots/desk.png" alt="Hangprobe desk studio showing a busy hang in HangDemo" width="900" />
+</p>
+
+<p align="center"><sub>HangDemo in Simulator — busy hang, App Focus stack, 1840 ms off the event loop.</sub></p>
+
+## When to use it
+
+1. **Simulator froze.** Select the app, press `⌘R` or run `hangprobe probe`. Exit code `1` if hung; the heaviest leaf says busy vs blocked.
+2. **After the fix.** Probe again, then open Diff & Trend or run `hangprobe diff`. See whether `main_gap_ms` moved and which frames left.
+3. **Agent or CI.** Wire `hangprobe mcp` (`probe_hang`) for agents, or `hangprobe gate` to fail a PR when the gap regresses.
+
 `oss/` is a thin vendoring surface (HangprobeKit, Android watchdog, wire schema) with no HangprobeCore imports.
 
 ## Install

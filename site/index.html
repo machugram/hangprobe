@@ -514,7 +514,7 @@ h1 .br { display: none; }
     <a class="word" href="#top">Hangprobe</a>
     <nav class="nav" aria-label="Page">
       <a href="#stage">Product</a>
-      <a href="#compare">Compare</a>
+      <a href="#usecases">Use cases</a>
       <a href="#install">Install</a>
     </nav>
     <span class="spacer"></span>
@@ -524,8 +524,8 @@ h1 .br { display: none; }
     </button>
     <div class="drawer" id="drawer">
       <a href="#stage">Product</a>
+      <a href="#usecases">Use cases</a>
       <a href="#source">Source</a>
-      <a href="#compare">Compare</a>
       <a href="#install">Install</a>
     </div>
   </div>
@@ -552,51 +552,71 @@ h1 .br { display: none; }
       <div class="frame">
         <div class="shot on" id="panel-report" role="tabpanel" aria-labelledby="tab-report">
           <div class="side">
-            <p>Mac</p>
-            <div class="app on">Finder <span>93736</span></div>
-            <div class="app">Simulator <span>55077</span></div>
+            <p>Simulator</p>
+            <div class="app on">HangDemo <span>55077</span></div>
+            <div class="app">Finder <span>93736</span></div>
             <div class="app">Safari <span>72601</span></div>
           </div>
           <div class="main">
-            <p class="kind">responsive</p>
-            <p class="gap">20 ms off the event loop</p>
-            <div class="bar" aria-hidden="true"><i class="busy"></i><i class="wait"></i></div>
-            <p class="cap">Busy 20 ms · blocked 0 · event wait 890 · window 910 · 91 samples</p>
-            <pre>mach_msg (in libsystem_kernel.dylib)
-mach_msg_overwrite (in libsystem_kernel.dylib)
-mach_msg2_internal (in libsystem_kernel.dylib)
+            <p class="kind">busy</p>
+            <p class="gap">1840 ms off the event loop</p>
+            <div class="bar" aria-hidden="true"><i class="busy" style="flex:9"></i><i class="wait" style="flex:1"></i></div>
+            <p class="cap">Busy 1840 ms · blocked 0 · event wait 120 · window 1960 · hung</p>
+            <pre>SportProfileEditorView.body.getter
+CatalogRepository.loadBlocking()
+DispatchQueue.main.sync
+__CFRunLoopRun (in CoreFoundation)
 mach_msg2_trap (in libsystem_kernel.dylib)</pre>
           </div>
         </div>
         <div class="shot" id="panel-stack" role="tabpanel" aria-labelledby="tab-stack" hidden>
           <div class="main">
-            <p class="kind">Leaf</p>
-            <p class="gap">mach_msg2_trap</p>
-            <pre>NSApplicationMain (in AppKit)
--[NSApplication run] (in AppKit)
-_DPSBlockUntilNextEventMatchingListInMode (in AppKit)
-ReceiveNextEventCommon (in HIToolbox)
-__CFRunLoopRun (in CoreFoundation)
-__CFRunLoopServiceMachPort (in CoreFoundation)
-mach_msg2_trap (in libsystem_kernel.dylib)</pre>
+            <p class="kind">App Focus</p>
+            <p class="gap">SportProfileEditorView.body.getter</p>
+            <pre>SportProfileEditorView.body.getter
+CatalogRepository.loadBlocking()
+· 6 framework frames folded
+DispatchQueue.main.sync
+· 4 CoreFoundation frames folded</pre>
           </div>
         </div>
         <div class="shot" id="panel-command" role="tabpanel" aria-labelledby="tab-command" hidden>
           <div class="main">
             <p class="kind">probe</p>
-            <pre><span class="p">$</span> swift run hangprobe probe Finder
+            <pre><span class="p">$</span> hangprobe probe HangDemo
 
-<span class="k">"kind"</span><span class="p">:</span> <span class="p">"responsive"</span>
-<span class="k">"main_gap_ms"</span><span class="p">:</span> 20
-<span class="k">"hung"</span><span class="p">:</span> false
-<span class="k">"top"</span><span class="p">:</span> <span class="p">"mach_msg2_trap"</span>
-<span class="k">"where"</span><span class="p">:</span> <span class="p">"mac"</span></pre>
+<span class="k">"kind"</span><span class="p">:</span> <span class="p">"busy"</span>
+<span class="k">"main_gap_ms"</span><span class="p">:</span> 1840
+<span class="k">"hung"</span><span class="p">:</span> true
+<span class="k">"top"</span><span class="p">:</span> <span class="p">"SportProfileEditorView.body.getter"</span>
+<span class="k">"where"</span><span class="p">:</span> <span class="p">"simulator"</span></pre>
           </div>
         </div>
       </div>
-      <p class="caption">Finder on this Mac, one second, 12 Nov 2026. The thread was in the event loop. 20 ms of the 910 ms window was off it.</p>
+      <p class="caption">HangDemo in Simulator, one second. Main thread was busy in <code>SportProfileEditorView.body</code> — 1840 ms off the event loop.</p>
     </div>
   </div>
+
+  <section id="usecases">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow">When to use it</span>
+        <h2>Three moments on the desk.</h2>
+        <p>Not a fleet tool. Reach for Hangprobe when the screen is frozen in front of you.</p>
+      </div>
+      <div class="steps">
+        <figure class="step">
+          <figcaption><span class="idx">01</span> <strong>Simulator froze.</strong> <span>Select the app, press <code>⌘R</code> or run <code>hangprobe probe</code>. Exit 1 if hung; the heaviest leaf says busy vs blocked.</span></figcaption>
+        </figure>
+        <figure class="step">
+          <figcaption><span class="idx">02</span> <strong>After the fix.</strong> <span>Probe again, then open Diff &amp; Trend or run <code>hangprobe diff</code>. See whether <code>main_gap_ms</code> moved and which frames left.</span></figcaption>
+        </figure>
+        <figure class="step">
+          <figcaption><span class="idx">03</span> <strong>Agent or CI.</strong> <span>Wire <code>hangprobe mcp</code> (<code>probe_hang</code>) for agents, or <code>hangprobe gate</code> to fail a PR when the gap regresses.</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
 
   <section>
     <div class="shell facts">
