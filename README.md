@@ -12,7 +12,13 @@ Apple's hang floor is `250 ms`. An Android `ANR` is a separate `~5,000 ms` OS ti
   <img src="assets/screenshots/desk.png" alt="Hangprobe desk studio showing a busy hang in HangDemo" width="900" />
 </p>
 
-<p align="center"><sub>HangDemo in Simulator — busy hang, App Focus stack, 1840 ms off the event loop.</sub></p>
+<p align="center"><sub>HangDemo busy hang — App Focus, ≥ 840 ms off the event loop.</sub></p>
+
+<p align="center">
+  <img src="assets/screenshots/inspect.gif" alt="Hangprobe inspector cycling App Focus, Full Stack, Hotspots, and Diff and Trend" width="900" />
+</p>
+
+<p align="center"><sub>Same run — App Focus → Full Stack → Hotspots → Diff & Trend.</sub></p>
 
 ## When to use it
 

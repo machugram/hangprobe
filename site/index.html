@@ -225,7 +225,7 @@ h1 {
 .frame {
   width: min(1120px, 100%);
   margin: 0 auto;
-  aspect-ratio: 1440 / 940;
+  aspect-ratio: 1280 / 800;
   border: 1px solid #f5f3f01a;
   border-radius: clamp(10px, 1.4vw, 18px);
   box-shadow: var(--shadow-stage);
@@ -237,31 +237,20 @@ h1 {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: 220px 1fr;
   opacity: 0;
   transform: scale(0.985);
   transition: opacity 300ms var(--ease-out), transform 400ms var(--ease-out);
   pointer-events: none;
+  background: var(--ground);
 }
 .shot.on { opacity: 1; transform: scale(1); pointer-events: auto; }
-.side { border-right: 1px solid var(--hairline-soft); padding: 1.25rem 0.8rem; background: var(--surface); }
-.side p, .cap { margin: 0; color: var(--ink-3); font-size: 0.75rem; }
-.app {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.55rem 0.7rem;
-  border-radius: 10px;
-  color: var(--ink-2);
-  font-size: 0.875rem;
+.shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  display: block;
 }
-.app.on { background: var(--raised); color: var(--ink); }
-.main { padding: 1.5rem 1.6rem; overflow: auto; }
-.kind { margin: 0; color: var(--ink); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; letter-spacing: -0.03em; }
-.gap { margin: 0.35rem 0 1rem; color: var(--ink); font-size: 1.15rem; }
-.bar { display: flex; height: 14px; gap: 2px; border-radius: 4px; overflow: hidden; background: var(--raised); }
-.bar i { display: block; height: 100%; }
-.busy { width: 2.2%; background: var(--orange); }
-.wait { width: 97.8%; background: var(--green); }
 .stack, pre {
   margin: 1rem 0 0;
   font-family: var(--mono);
@@ -479,8 +468,7 @@ h1 .br { display: none; }
   .chev { right: auto; left: 50%; top: auto; bottom: -0.95rem; translate: -50% 0; rotate: 90deg; }
 }
 @media (max-width: 900px) {
-  .lead, .install, .shot { grid-template-columns: 1fr; }
-  .side { display: none; }
+  .lead, .install { grid-template-columns: 1fr; }
 }
 @media (max-width: 860px) {
   .scroller { overflow-x: auto; }
@@ -544,56 +532,23 @@ h1 .br { display: none; }
 
   <div id="stage">
     <div class="notch" role="tablist" aria-label="Product views">
-      <button class="tab" role="tab" id="tab-report" aria-controls="panel-report" aria-selected="true" tabindex="0">Report</button>
-      <button class="tab" role="tab" id="tab-stack" aria-controls="panel-stack" aria-selected="false" tabindex="-1">Stack</button>
-      <button class="tab" role="tab" id="tab-command" aria-controls="panel-command" aria-selected="false" tabindex="-1">Command</button>
+      <button class="tab" role="tab" id="tab-report" aria-controls="panel-report" aria-selected="true" tabindex="0">App Focus</button>
+      <button class="tab" role="tab" id="tab-stack" aria-controls="panel-stack" aria-selected="false" tabindex="-1">Hotspots</button>
+      <button class="tab" role="tab" id="tab-command" aria-controls="panel-command" aria-selected="false" tabindex="-1">Inspect</button>
     </div>
     <div class="field">
       <div class="frame">
         <div class="shot on" id="panel-report" role="tabpanel" aria-labelledby="tab-report">
-          <div class="side">
-            <p>Simulator</p>
-            <div class="app on">HangDemo <span>55077</span></div>
-            <div class="app">Finder <span>93736</span></div>
-            <div class="app">Safari <span>72601</span></div>
-          </div>
-          <div class="main">
-            <p class="kind">busy</p>
-            <p class="gap">1840 ms off the event loop</p>
-            <div class="bar" aria-hidden="true"><i class="busy" style="flex:9"></i><i class="wait" style="flex:1"></i></div>
-            <p class="cap">Busy 1840 ms · blocked 0 · event wait 120 · window 1960 · hung</p>
-            <pre>SportProfileEditorView.body.getter
-CatalogRepository.loadBlocking()
-DispatchQueue.main.sync
-__CFRunLoopRun (in CoreFoundation)
-mach_msg2_trap (in libsystem_kernel.dylib)</pre>
-          </div>
+          <img src="../assets/screenshots/desk.png" alt="Hangprobe App Focus view of a busy HangDemo hang" width="1280" height="800" />
         </div>
         <div class="shot" id="panel-stack" role="tabpanel" aria-labelledby="tab-stack" hidden>
-          <div class="main">
-            <p class="kind">App Focus</p>
-            <p class="gap">SportProfileEditorView.body.getter</p>
-            <pre>SportProfileEditorView.body.getter
-CatalogRepository.loadBlocking()
-· 6 framework frames folded
-DispatchQueue.main.sync
-· 4 CoreFoundation frames folded</pre>
-          </div>
+          <img src="../assets/screenshots/hotspots.png" alt="Hangprobe Hotspots presence across main-thread samples" width="1280" height="800" />
         </div>
         <div class="shot" id="panel-command" role="tabpanel" aria-labelledby="tab-command" hidden>
-          <div class="main">
-            <p class="kind">probe</p>
-            <pre><span class="p">$</span> hangprobe probe HangDemo
-
-<span class="k">"kind"</span><span class="p">:</span> <span class="p">"busy"</span>
-<span class="k">"main_gap_ms"</span><span class="p">:</span> 1840
-<span class="k">"hung"</span><span class="p">:</span> true
-<span class="k">"top"</span><span class="p">:</span> <span class="p">"SportProfileEditorView.body.getter"</span>
-<span class="k">"where"</span><span class="p">:</span> <span class="p">"simulator"</span></pre>
-          </div>
+          <img src="../assets/screenshots/inspect.gif" alt="Hangprobe inspector cycling App Focus, Full Stack, Hotspots, and Diff and Trend" width="900" height="562" />
         </div>
       </div>
-      <p class="caption">HangDemo in Simulator, one second. Main thread was busy in <code>SportProfileEditorView.body</code> — 1840 ms off the event loop.</p>
+      <p class="caption">Live Hangprobe desk — HangDemo busy hang, ≥ 840 ms off the event loop. Inspect cycles App Focus → Full Stack → Hotspots → Diff &amp; Trend.</p>
     </div>
   </div>
 

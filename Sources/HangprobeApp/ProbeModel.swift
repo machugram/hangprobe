@@ -401,18 +401,18 @@ final class ProbeModel {
                 "__CFRunLoopDoObservers (in CoreFoundation)",
                 "CA::Transaction::commit() (in QuartzCore)",
                 "-[UIView layoutSubviews] (in UIKitCore)",
-                "SportProfileEditorView.recomputeMetrics() (in Awtsyde)",
-                "SportProfileEditorView.body.getter (in Awtsyde)",
+                "SportProfileEditorView.recomputeMetrics() (in HangDemo)",
+                "SportProfileEditorView.body.getter (in HangDemo)",
             ],
             pid: 55102,
-            app: "Awtsyde",
-            bundleID: "com.awtsyde.mobile",
+            app: "HangDemo",
+            bundleID: "com.example.hangdemo",
             place: .simulator,
             note: "Preview · Layout pass stayed on-CPU across 84 of 92 samples.",
             context: HangContext(commit: "8f3c12a", screen: "SportProfileEditorView", device: "iPhone 17 Pro Sim", os: "iOS 20.1", arch: "arm64"),
             hotspots: [
-                FrameHotspot(frame: "SportProfileEditorView.body.getter (in Awtsyde)", hits: 84, totalSamples: 92),
-                FrameHotspot(frame: "SportProfileEditorView.recomputeMetrics() (in Awtsyde)", hits: 79, totalSamples: 92),
+                FrameHotspot(frame: "SportProfileEditorView.body.getter (in HangDemo)", hits: 84, totalSamples: 92),
+                FrameHotspot(frame: "SportProfileEditorView.recomputeMetrics() (in HangDemo)", hits: 79, totalSamples: 92),
                 FrameHotspot(frame: "-[UIView layoutSubviews] (in UIKitCore)", hits: 84, totalSamples: 92),
                 FrameHotspot(frame: "__CFRunLoopServiceMachPort (in CoreFoundation)", hits: 8, totalSamples: 92),
             ]
@@ -435,19 +435,19 @@ final class ProbeModel {
                 "__CFRunLoopRun (in CoreFoundation)",
                 "__CFRunLoopDoSources0 (in CoreFoundation)",
                 "__CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE0_PERFORM_FUNCTION__ (in CoreFoundation)",
-                "-[CatalogStore syncMainThread] (in Awtsyde)",
+                "-[CatalogStore syncMainThread] (in HangDemo)",
                 "_pthread_mutex_firstfit_lock_slow (in libsystem_pthread.dylib)",
                 "__psynch_mutexwait (in libsystem_kernel.dylib)",
             ],
             pid: 55102,
-            app: "Awtsyde",
-            bundleID: "com.awtsyde.mobile",
+            app: "HangDemo",
+            bundleID: "com.example.hangdemo",
             place: .simulator,
             note: "Preview · Main thread parked on a contended mutex inside a Source0 callback.",
             context: HangContext(commit: "8f3c12a", screen: "CatalogSheet", device: "iPhone 17 Pro Sim", os: "iOS 20.1", arch: "arm64"),
             hotspots: [
                 FrameHotspot(frame: "__psynch_mutexwait (in libsystem_kernel.dylib)", hits: 93, totalSamples: 93),
-                FrameHotspot(frame: "-[CatalogStore syncMainThread] (in Awtsyde)", hits: 93, totalSamples: 93),
+                FrameHotspot(frame: "-[CatalogStore syncMainThread] (in HangDemo)", hits: 93, totalSamples: 93),
             ]
         )
 
@@ -471,8 +471,8 @@ final class ProbeModel {
                 "mach_msg2_trap (in libsystem_kernel.dylib)",
             ],
             pid: 55102,
-            app: "Awtsyde",
-            bundleID: "com.awtsyde.mobile",
+            app: "HangDemo",
+            bundleID: "com.example.hangdemo",
             place: .simulator,
             note: "Preview · Fix verified: main thread spent 98% of the window parked cleanly in the event loop.",
             context: HangContext(commit: "94d01ef", screen: "SportProfileEditorView", device: "iPhone 17 Pro Sim", os: "iOS 20.1", arch: "arm64"),
@@ -483,6 +483,9 @@ final class ProbeModel {
         )
 
         error = nil
+        // Showcase is not tied to a live sidebar row — clear selection so the
+        // nav title falls through to report.app (HangDemo) instead of the last probe target.
+        selection = nil
         appHistory = [blockedSample, busySample, responsiveSample]
         switch kind {
         case .busy:
