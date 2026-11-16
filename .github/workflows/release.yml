@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    name: Build macOS artifacts
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Build release artifacts
+        env:
+          HANGPROBE_VERSION: ${{ github.ref_name }}
+        run: |
+          # Strip leading v for CFBundle version folders if present
+          export HANGPROBE_VERSION="${HANGPROBE_VERSION#v}"
+          scripts/release-macos.sh
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/release/*/Hangprobe.app.zip
+            dist/release/*/hangprobe-macos-universal.tar.gz
+            dist/release/*/SHA256SUMS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

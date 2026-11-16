@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#252E4A"/>
+      <stop offset="55%" stop-color="#151B2E"/>
+      <stop offset="100%" stop-color="#0E1220"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="44%" r="48%">
+      <stop offset="0%" stop-color="#5B86FF" stop-opacity="0.28"/>
+      <stop offset="70%" stop-color="#5B86FF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#5B86FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4ADE80"/>
+      <stop offset="55%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+    <radialGradient id="beacon" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FDA4AF" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#F43F5E" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- macOS squircle -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#glow)"/>
+  <rect x="104" y="104" width="816" height="816" rx="181" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="8"/>
+
+  <!-- Bold, Dock-legible pulse silhouette (no thin dashed hairlines that blur at 32px) -->
+  <path d="M 212 544 L 320 544 L 388 380 L 468 676 L 552 292 L 644 544"
+        fill="none" stroke="url(#wave)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Stall flatline -->
+  <line x1="644" y1="544" x2="812" y2="544" stroke="#FB7185" stroke-width="48" stroke-linecap="round"/>
+
+  <!-- Probe capture node -->
+  <circle cx="644" cy="544" r="108" fill="url(#beacon)"/>
+  <circle cx="644" cy="544" r="54" fill="#FB7185"/>
+  <circle cx="644" cy="544" r="24" fill="#FFF1F2"/>
+</svg>

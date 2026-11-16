@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0c0a09">
+<link rel="icon" type="image/svg+xml" href="../assets/hangprobe-icon.svg">
+<title>Hangprobe — The main thread stopped answering.</title>
+<style>
+:root {
+  color-scheme: dark;
+  --ground: #0c0a09;
+  --surface: #191614;
+  --raised: #221d19;
+  --hairline: #2e2723;
+  --hairline-soft: #241f1b;
+  --ink: #f5f3f0;
+  --ink-2: #a9a19a;
+  --ink-3: #7c746d;
+  --blue: #3987e5;
+  --blue-soft: #6ba7ee;
+  --orange: #d95926;
+  --green: #199e70;
+  --amber: #fab219;
+  --red: #d03b3b;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --radius-pill: 999px;
+  --radius-stage: 24px;
+  --radius-card: 14px;
+  --radius-chip: 10px;
+  --edge: inset 0 1px 0 #f5f3f00f;
+  --shadow-float: 0 1px 2px #00000080, 0 16px 40px #00000073;
+  --shadow-stage: 0 2px 4px #0006, 0 40px 80px #0000008c;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --shell: 1180px;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+:target { scroll-margin-top: 7rem; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+h1, h2, h3, h4 {
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  background: var(--ink);
+  color: var(--ground);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-pill);
+  z-index: 20;
+}
+.skip:focus { top: 1rem; }
+.shell { width: min(var(--shell), calc(100% - var(--gutter) * 2)); margin-inline: auto; }
+.header {
+  position: fixed;
+  inset: 0.875rem 0 auto;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+.pill {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  width: min(620px, calc(100% - 1.5rem));
+  height: 54px;
+  padding: 0 0.4rem 0 1.125rem;
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-float), var(--edge);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+.word { color: var(--ink); font-size: 0.9375rem; font-weight: 500; text-decoration: none; }
+.nav { display: none; gap: 1.25rem; margin-left: 1.5rem; }
+.nav a { color: var(--ink-2); font-size: 0.875rem; text-decoration: none; }
+.nav a:hover { color: var(--ink); }
+.pill .spacer { flex: 1; }
+.cta, .btn-primary, .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 140ms var(--ease-out);
+}
+.cta, .btn-primary { background: var(--ink); color: var(--ground); }
+.cta:hover, .btn-primary:hover { background: #fff; }
+.cta:active, .btn-primary:active, .btn-secondary:active, .icon-btn:active { transform: scale(0.97); }
+.cta { height: 40px; padding: 0 0.9375rem; font-size: 0.875rem; }
+.cta .label { display: none; }
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 0.35rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+}
+.drawer {
+  display: none;
+  position: absolute;
+  top: 62px;
+  left: 0.75rem;
+  right: 0.75rem;
+  padding: 0.75rem;
+  background: var(--raised);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  box-shadow: var(--shadow-float), var(--edge);
+}
+.drawer a { display: block; padding: 0.7rem 0.8rem; color: var(--ink-2); text-decoration: none; }
+.drawer.open { display: block; pointer-events: auto; }
+.hero {
+  position: relative;
+  text-align: center;
+  padding: clamp(8rem, 15vw, 10.5rem) var(--gutter) clamp(3.5rem, 8vw, 5rem);
+  overflow: hidden;
+}
+.hero::before, .close::before {
+  content: "";
+  position: absolute;
+  width: min(980px, 120%);
+  aspect-ratio: 1;
+  inset: -30% 50% auto;
+  translate: 50%;
+  background: radial-gradient(circle at center, color-mix(in oklab, var(--blue) 14%, transparent) 0%, transparent 62%);
+  pointer-events: none;
+}
+.close::before { width: min(900px, 130%); background: radial-gradient(circle at center, color-mix(in oklab, var(--blue) 15%, transparent) 0%, transparent 62%); }
+.hero > *, .close > * { position: relative; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.3125rem 0.875rem 0.3125rem 0.3125rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--blue) 13%, var(--ground));
+  color: var(--blue-soft);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.badge .tag {
+  padding: 0.25rem 0.6875rem;
+  border-radius: var(--radius-pill);
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge:hover { background: color-mix(in oklab, var(--blue) 20%, var(--ground)); }
+.badge:hover .arrow { translate: 2px 0; }
+h1 {
+  margin: 1.25rem auto 0;
+  max-width: 15ch;
+  font-size: clamp(2.25rem, 8.5vw, 5.5rem);
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+}
+.lede {
+  max-width: 48ch;
+  margin: 1.25rem auto 0;
+  font-size: clamp(1.0625rem, 1.4vw, 1.1875rem);
+}
+.actions { display: flex; justify-content: center; gap: 0.75rem; margin-top: 1.75rem; flex-wrap: wrap; }
+.btn-primary, .btn-secondary { min-height: 46px; padding: 0 1.5rem; font-size: 0.9375rem; }
+.btn-secondary { background: transparent; border-color: var(--hairline); color: var(--ink); }
+.btn-secondary:hover { border-color: var(--ink-3); background: var(--surface); }
+.notch {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  background: var(--ground);
+  border-radius: 0 0 26px 26px;
+  padding: 0.5rem 0.75rem 0.875rem;
+}
+.tab, .pane-tab {
+  min-height: 40px;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.tab[aria-selected="true"], .pane-tab[aria-selected="true"] { background: var(--raised); color: var(--ink); }
+.field {
+  background:
+    radial-gradient(90% 70% at 12% 0%, #2f5fd0 0%, transparent 58%),
+    radial-gradient(80% 65% at 88% 4%, #6c3bd0 0%, transparent 55%),
+    radial-gradient(120% 90% at 50% 100%, #0b2a63 0%, transparent 70%),
+    linear-gradient(#1b3a8a 0%, #12245c 45%, #0a1230 100%);
+  padding: 0 clamp(0.75rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 3rem);
+}
+.frame {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  aspect-ratio: 1440 / 940;
+  border: 1px solid #f5f3f01a;
+  border-radius: clamp(10px, 1.4vw, 18px);
+  box-shadow: var(--shadow-stage);
+  overflow: hidden;
+  background: var(--ground);
+  position: relative;
+}
+.shot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  opacity: 0;
+  transform: scale(0.985);
+  transition: opacity 300ms var(--ease-out), transform 400ms var(--ease-out);
+  pointer-events: none;
+}
+.shot.on { opacity: 1; transform: scale(1); pointer-events: auto; }
+.side { border-right: 1px solid var(--hairline-soft); padding: 1.25rem 0.8rem; background: var(--surface); }
+.side p, .cap { margin: 0; color: var(--ink-3); font-size: 0.75rem; }
+.app {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+.app.on { background: var(--raised); color: var(--ink); }
+.main { padding: 1.5rem 1.6rem; overflow: auto; }
+.kind { margin: 0; color: var(--ink); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; letter-spacing: -0.03em; }
+.gap { margin: 0.35rem 0 1rem; color: var(--ink); font-size: 1.15rem; }
+.bar { display: flex; height: 14px; gap: 2px; border-radius: 4px; overflow: hidden; background: var(--raised); }
+.bar i { display: block; height: 100%; }
+.busy { width: 2.2%; background: var(--orange); }
+.wait { width: 97.8%; background: var(--green); }
+.stack, pre {
+  margin: 1rem 0 0;
+  font-family: var(--mono);
+  font-variant-ligatures: none;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+}
+.k { color: var(--blue); }
+.p { color: var(--ink-3); }
+.caption { width: min(1120px, 100%); margin: 0.85rem auto 0; color: var(--ink-3); font-size: 0.8125rem; }
+section { padding: clamp(3.5rem, 8vw, 6.5rem) 0; }
+.head { max-width: 40rem; margin: 0 auto 2.5rem; text-align: center; }
+.eyebrow {
+  display: inline-flex;
+  padding: 0.3125rem 0.875rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+h2 { margin: 0.9rem 0 0; font-size: clamp(1.875rem, 3.8vw, 3rem); line-height: 1.05; }
+.head p, .facts p, .card p { color: var(--ink-3); }
+.head p { max-width: 34rem; margin: 0.9rem auto 0; }
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.facts h3 { margin: 0 0 0.45rem; font-size: 1.0625rem; }
+.facts p, .card p { margin: 0; font-size: 0.9375rem; }
+.bento { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(1.5rem, 2.4vw, 2rem) clamp(1.5rem, 2.4vw, 2rem) 0;
+  background: color-mix(in oklab, var(--surface) 72%, var(--ground));
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--radius-stage);
+}
+.lead { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(1.5rem, 4vw, 3.5rem); }
+.chip {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+.cat { margin: 1.125rem 0 0.45rem; font-size: 0.9375rem; font-weight: 500; }
+h3.card-title { margin: 0; font-size: clamp(1.3125rem, 2vw, 1.625rem); letter-spacing: -0.02em; line-height: 1.12; max-width: 22ch; }
+.card p { margin-top: 0.7rem; }
+.more { color: var(--blue); text-decoration: none; font-size: 0.9375rem; }
+.win {
+  background: var(--ground);
+  border: 1px solid var(--hairline);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  min-height: 180px;
+  padding: 0.85rem 1rem 1rem;
+}
+.win .top { color: var(--ink-3); font-family: var(--mono); font-size: 0.6875rem; margin-bottom: 0.7rem; }
+.blue { background: color-mix(in oklab, var(--blue) 13%, transparent); border: 1px solid color-mix(in oklab, var(--blue) 28%, transparent); color: var(--blue); }
+.amber { background: color-mix(in oklab, var(--amber) 13%, transparent); border: 1px solid color-mix(in oklab, var(--amber) 28%, transparent); color: var(--amber); }
+.orange { background: color-mix(in oklab, var(--orange) 13%, transparent); border: 1px solid color-mix(in oklab, var(--orange) 28%, transparent); color: var(--orange); }
+.green { background: color-mix(in oklab, var(--green) 13%, transparent); border: 1px solid color-mix(in oklab, var(--green) 28%, transparent); color: var(--green); }
+.red { background: color-mix(in oklab, var(--red) 13%, transparent); border: 1px solid color-mix(in oklab, var(--red) 28%, transparent); color: var(--red); }
+.cat.blue { background: none; border: 0; }
+.cat.amber, .cat.orange, .cat.green, .cat.red { background: none; border: 0; }
+.flow { width: min(1400px, calc(100% - var(--gutter) * 2)); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+.step { position: relative; }
+.chrome {
+  background: var(--ground);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.chrome .barrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--hairline-soft);
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--raised); border: 1px solid var(--hairline); }
+.url {
+  margin-left: 0.4rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+}
+.chrome pre { margin: 0; padding: 0.9rem 1rem; height: clamp(14rem, 20vw, 17rem); overflow: auto; }
+.step figcaption { margin-top: 0.9rem; font-size: 0.9375rem; }
+.idx { color: var(--blue); font-family: var(--mono); font-size: 0.8125rem; margin-right: 0.4rem; }
+.step strong { color: var(--ink); font-weight: 500; }
+.chev {
+  position: absolute;
+  right: -0.95rem;
+  top: 38%;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: var(--ground);
+  color: var(--ink-3);
+  display: grid;
+  place-items: center;
+}
+.table-wrap { position: relative; }
+.rail {
+  position: absolute;
+  left: 42%;
+  width: 31%;
+  top: -0.875rem;
+  bottom: -0.875rem;
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--blue) 7%, transparent);
+  border: 1px solid color-mix(in oklab, var(--blue) 38%, transparent);
+  pointer-events: none;
+}
+table { width: 100%; border-collapse: collapse; position: relative; min-width: 46rem; }
+th, td { text-align: left; padding: 0.95rem 0.8rem; border-bottom: 1px solid var(--hairline-soft); vertical-align: middle; }
+th { color: var(--ink-3); font-size: 0.8125rem; font-weight: 500; }
+td:first-child { width: 42%; color: var(--ink); }
+td:nth-child(2) { width: 31%; color: var(--ink-2); }
+td:nth-child(3) { width: 27%; color: var(--ink-3); }
+.disc {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  margin-right: 0.45rem;
+  vertical-align: -4px;
+}
+.yes { background: color-mix(in oklab, var(--blue) 20%, transparent); color: var(--blue-soft); }
+.no { background: var(--raised); color: var(--ink-3); }
+.scroller { overflow-x: auto; }
+.install {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 2rem;
+  padding: clamp(1.5rem, 2.4vw, 2rem);
+  background: color-mix(in oklab, var(--surface) 72%, var(--ground));
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--radius-stage);
+  align-items: center;
+}
+.check { list-style: none; padding: 0; margin: 1rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem 1rem; }
+.check li { color: var(--ink-2); font-size: 0.9375rem; }
+.check li::before { content: ""; display: inline-block; width: 0.55rem; height: 0.35rem; margin-right: 0.45rem; border-left: 2px solid var(--green); border-bottom: 2px solid var(--green); transform: rotate(-45deg) translateY(-1px); }
+.note { color: var(--ink-3); font-size: 0.8125rem; }
+.hint { color: var(--ink-3); font-family: var(--mono); font-size: 0.6875rem; margin-top: 0.6rem; }
+.pane { display: none; }
+.pane.on { display: block; animation: rise 200ms var(--ease-out); }
+@keyframes rise { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }
+.faq { max-width: 46rem; margin: 0 auto; }
+details { border-bottom: 1px solid var(--hairline-soft); }
+summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.05rem 0;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  list-style: none;
+}
+summary::-webkit-details-marker { display: none; }
+.plus { position: relative; width: 14px; height: 14px; flex: none; }
+.plus::before, .plus::after {
+  content: "";
+  position: absolute;
+  background: var(--ink-2);
+  border-radius: 1px;
+}
+.plus::before { left: 6px; top: 0; width: 1.5px; height: 14px; transition: transform 240ms var(--ease-out), background 160ms; }
+.plus::after { left: 0; top: 6px; width: 14px; height: 1.5px; }
+details[open] .plus::before { transform: rotate(90deg); background: var(--blue); }
+details p { margin: 0 0 1.1rem; padding-right: 2rem; font-size: 0.9375rem; }
+code { font-family: var(--mono); font-variant-ligatures: none; color: var(--amber); background: var(--raised); border-radius: 5px; padding: 0.1rem 0.35rem; font-size: 0.8125rem; }
+.close { position: relative; text-align: center; overflow: hidden; padding: clamp(4rem, 9vw, 7rem) var(--gutter); }
+.close h2 { margin: 0 auto; max-width: 18ch; font-size: clamp(2.125rem, 5.5vw, 4rem); letter-spacing: -0.035em; line-height: 1.02; }
+.close p { max-width: 40ch; margin: 1rem auto 0; }
+footer { border-top: 1px solid var(--hairline-soft); padding: 3rem 0 0; }
+.foot { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; }
+.foot h2 { font-size: 0.9375rem; margin: 0; }
+.blurb { max-width: 34ch; color: var(--ink-3); font-size: 0.9375rem; }
+.foot h3 { margin: 0 0 0.7rem; font-family: var(--mono); font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.foot a { display: block; color: var(--ink-2); text-decoration: none; font-size: 0.9375rem; padding: 0.2rem 0; }
+.base { display: flex; justify-content: space-between; margin-top: 2.5rem; color: var(--ink-3); font-size: 0.8125rem; }
+.mark { display: grid; justify-items: start; gap: clamp(0.5rem, 1.2vw, 0.875rem); margin-top: 2rem; }
+.mark i { display: block; height: clamp(2.25rem, 6vw, 4.25rem); border-radius: clamp(0.875rem, 2vw, 1.5rem); }
+.b1 { width: 42.5%; background: color-mix(in oklab, var(--blue) 42%, var(--ground)); }
+.b2 { width: 65%; background: var(--raised); }
+.b3 { width: 100%; background: color-mix(in oklab, var(--raised) 55%, var(--ground)); margin-bottom: calc(clamp(2.25rem, 6vw, 4.25rem) * -0.55); }
+h1 .br { display: none; }
+@media (min-width: 640px) {
+  h1 .br { display: block; }
+}
+@media (min-width: 860px) {
+  .nav { display: flex; }
+  .icon-btn, .drawer { display: none; }
+  .cta .label { display: inline; }
+}
+@media (max-width: 1080px) {
+  .flow { grid-template-columns: 1fr; }
+  .chev { right: auto; left: 50%; top: auto; bottom: -0.95rem; translate: -50% 0; rotate: 90deg; }
+}
+@media (max-width: 900px) {
+  .lead, .install, .shot { grid-template-columns: 1fr; }
+  .side { display: none; }
+}
+@media (max-width: 860px) {
+  .scroller { overflow-x: auto; }
+}
+@media (max-width: 800px) {
+  .facts { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .foot { grid-template-columns: 1fr 1fr; }
+  .blurb { grid-column: 1 / -1; }
+  .bento { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .actions, .close .actions { flex-direction: column; }
+  .btn-primary, .btn-secondary { width: 100%; }
+  .check { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .cta, .btn-primary, .btn-secondary, .icon-btn, .shot, .badge .arrow { transition: none; }
+  .cta:active, .btn-primary:active, .btn-secondary:active, .icon-btn:active { transform: none; }
+  .pane.on { animation: none; }
+  .shot { transform: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the product</a>
+<header class="header">
+  <div class="pill">
+    <a class="word" href="#top">Hangprobe</a>
+    <nav class="nav" aria-label="Page">
+      <a href="#stage">Product</a>
+      <a href="#compare">Compare</a>
+      <a href="#install">Install</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="cta" href="#source"><span class="label">View on GitHub</span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+    <button class="icon-btn" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open menu">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+    <div class="drawer" id="drawer">
+      <a href="#stage">Product</a>
+      <a href="#source">Source</a>
+      <a href="#compare">Compare</a>
+      <a href="#install">Install</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <a class="badge" href="#source"><span class="tag">v0.1.0</span> MIT open source <span class="arrow" aria-hidden="true">→</span></a>
+    <h1>The main thread <br class="br">stopped answering.</h1>
+    <p class="lede">Hangprobe samples it for a second. Time outside the UI event loop is the hang, and the heaviest stack says whether the thread was busy or blocked.</p>
+    <div class="actions">
+      <a class="btn-primary" href="#install">Install</a>
+      <a class="btn-secondary" href="https://github.com/machugram/hangprobe">GitHub <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <div id="stage">
+    <div class="notch" role="tablist" aria-label="Product views">
+      <button class="tab" role="tab" id="tab-report" aria-controls="panel-report" aria-selected="true" tabindex="0">Report</button>
+      <button class="tab" role="tab" id="tab-stack" aria-controls="panel-stack" aria-selected="false" tabindex="-1">Stack</button>
+      <button class="tab" role="tab" id="tab-command" aria-controls="panel-command" aria-selected="false" tabindex="-1">Command</button>
+    </div>
+    <div class="field">
+      <div class="frame">
+        <div class="shot on" id="panel-report" role="tabpanel" aria-labelledby="tab-report">
+          <div class="side">
+            <p>Mac</p>
+            <div class="app on">Finder <span>93736</span></div>
+            <div class="app">Simulator <span>55077</span></div>
+            <div class="app">Safari <span>72601</span></div>
+          </div>
+          <div class="main">
+            <p class="kind">responsive</p>
+            <p class="gap">20 ms off the event loop</p>
+            <div class="bar" aria-hidden="true"><i class="busy"></i><i class="wait"></i></div>
+            <p class="cap">Busy 20 ms · blocked 0 · event wait 890 · window 910 · 91 samples</p>
+            <pre>mach_msg (in libsystem_kernel.dylib)
+mach_msg_overwrite (in libsystem_kernel.dylib)
+mach_msg2_internal (in libsystem_kernel.dylib)
+mach_msg2_trap (in libsystem_kernel.dylib)</pre>
+          </div>
+        </div>
+        <div class="shot" id="panel-stack" role="tabpanel" aria-labelledby="tab-stack" hidden>
+          <div class="main">
+            <p class="kind">Leaf</p>
+            <p class="gap">mach_msg2_trap</p>
+            <pre>NSApplicationMain (in AppKit)
+-[NSApplication run] (in AppKit)
+_DPSBlockUntilNextEventMatchingListInMode (in AppKit)
+ReceiveNextEventCommon (in HIToolbox)
+__CFRunLoopRun (in CoreFoundation)
+__CFRunLoopServiceMachPort (in CoreFoundation)
+mach_msg2_trap (in libsystem_kernel.dylib)</pre>
+          </div>
+        </div>
+        <div class="shot" id="panel-command" role="tabpanel" aria-labelledby="tab-command" hidden>
+          <div class="main">
+            <p class="kind">probe</p>
+            <pre><span class="p">$</span> swift run hangprobe probe Finder
+
+<span class="k">"kind"</span><span class="p">:</span> <span class="p">"responsive"</span>
+<span class="k">"main_gap_ms"</span><span class="p">:</span> 20
+<span class="k">"hung"</span><span class="p">:</span> false
+<span class="k">"top"</span><span class="p">:</span> <span class="p">"mach_msg2_trap"</span>
+<span class="k">"where"</span><span class="p">:</span> <span class="p">"mac"</span></pre>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Finder on this Mac, one second, 12 Nov 2026. The thread was in the event loop. 20 ms of the 910 ms window was off it.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="shell facts">
+      <div>
+        <h3>Nothing is linked into the app.</h3>
+        <p><code>sample</code> already ships with macOS. Hangprobe shells out to it. The process under test does not gain a framework.</p>
+      </div>
+      <div>
+        <h3>One report, three places.</h3>
+        <p>A Mac app, a user app in the booted Simulator, and an Android package <code>adb</code> can see. The fields do not change.</p>
+      </div>
+      <div>
+        <h3>A hung probe exits 1.</h3>
+        <p>A script can gate on <code>hangprobe probe</code>. The threshold stays 250 ms, which is Apple's floor for a hang.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow">The report</span>
+        <h2>Busy, blocked, or waiting.</h2>
+        <p>The heaviest main-thread leaf is the note you paste into the bug. System frames stay. The app frame is the one to read first.</p>
+      </div>
+      <div class="bento">
+        <article class="card lead">
+          <div>
+            <div class="chip blue">{}</div>
+            <p class="cat blue">Report</p>
+            <h3 class="card-title">kind, main_gap_ms, and the stack.</h3>
+            <p><code>busy</code> is on the CPU. <code>blocked</code> is a lock or a sleep off the run loop. <code>responsive</code> is the event loop. <code>gap_at_least</code> means the thread never returned.</p>
+          </div>
+          <div class="win">
+            <div class="top">hangprobe probe Finder</div>
+            <pre><span class="k">hung</span>          false
+<span class="k">kind</span>          responsive
+<span class="k">main_gap_ms</span>  20
+<span class="k">event_wait</span>   890
+<span class="k">top</span>           mach_msg2_trap</pre>
+          </div>
+        </article>
+        <article class="card">
+          <div class="chip amber">W</div>
+          <p class="cat amber">Watch</p>
+          <h3 class="card-title">Stop at the first hang.</h3>
+          <p><code>hangprobe watch</code> samples every few seconds and keeps the first window that crosses the threshold.</p>
+        </article>
+        <article class="card">
+          <div class="chip orange">A</div>
+          <p class="cat orange">Android</p>
+          <h3 class="card-title">Looper is the event loop.</h3>
+          <p>A live <code>debuggerd -b</code> dump. A lock off that loop is blocked. An ANR is labeled at about 5 seconds, not 250 ms.</p>
+        </article>
+        <article class="card">
+          <div class="chip green">M</div>
+          <p class="cat green">MCP</p>
+          <h3 class="card-title">One tool, probe_hang.</h3>
+          <p>Pid, bundle id, or process name. Seconds 1–3. Threshold default 250. The window and the agent share one core.</p>
+          <p><a class="more" href="#install">Read the command →</a></p>
+        </article>
+        <article class="card">
+          <div class="chip red">D</div>
+          <p class="cat red">Diff</p>
+          <h3 class="card-title">Did the gap get smaller.</h3>
+          <p><code>hangprobe diff</code> compares the last two saved probes: <code>main_gap_ms</code>, and which frames appeared or left.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="shell head">
+      <span class="eyebrow">Workflow</span>
+      <h2>Three commands.</h2>
+      <p>The screen is up. You do not open an Instruments document.</p>
+    </div>
+    <div class="flow">
+      <figure class="step">
+        <div class="chrome">
+          <div class="barrow"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">probe</span></div>
+          <pre><span class="p">$</span> swift run hangprobe probe Finder --seconds 1
+
+<span class="k">kind</span>          responsive
+<span class="k">main_gap_ms</span>  20
+<span class="k">exit</span>          0</pre>
+        </div>
+        <figcaption><span class="idx">01</span> <strong>Sample the main thread.</strong> <span>One second. The process pauses while <code>sample</code> runs.</span></figcaption>
+        <span class="chev" aria-hidden="true">›</span>
+      </figure>
+      <figure class="step">
+        <div class="chrome">
+          <div class="barrow"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">kind</span></div>
+          <pre>responsive   event loop
+busy         on the CPU
+blocked      lock or sleep
+
+threshold    250 ms</pre>
+        </div>
+        <figcaption><span class="idx">02</span> <strong>Read the kind and the gap.</strong> <span>The leaf of the heaviest stack is the frame to follow.</span></figcaption>
+        <span class="chev" aria-hidden="true">›</span>
+      </figure>
+      <figure class="step">
+        <div class="chrome">
+          <div class="barrow"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="url">diff</span></div>
+          <pre><span class="p">$</span> swift run hangprobe diff Finder
+
+<span class="k">before_gap_ms</span>
+<span class="k">after_gap_ms</span>
+<span class="k">frames_added</span>
+<span class="k">frames_removed</span></pre>
+        </div>
+        <figcaption><span class="idx">03</span> <strong>Probe again after the change.</strong> <span>The diff says whether the gap moved, and which frames left.</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="source">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow">Open source</span>
+        <h2>MIT. Every command. No keys.</h2>
+        <p>Desk studio, CLI, MCP, inbox, gate, and device watchdogs ship under one MIT license. Local samples stay on your Mac.</p>
+      </div>
+      <div class="steps" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        <figure class="step">
+          <figcaption><span class="idx">Probe</span> <strong>CLI &amp; MCP</strong> <span><code>probe</code>, <code>watch</code>, <code>worst</code>, <code>diff</code>, <code>gate</code>, <code>probe_hang</code>.</span></figcaption>
+        </figure>
+        <figure class="step">
+          <figcaption><span class="idx">Desk</span> <strong>Mac studio</strong> <span>Hotspots, Diff &amp; Trend, MetricKit / appexit import, Markdown/JSON export.</span></figcaption>
+        </figure>
+        <figure class="step">
+          <figcaption><span class="idx">Phone</span> <strong>Inbox &amp; SDKs</strong> <span>Shared <code>:9481</code> inbox, HangprobeKit + Android watchdog under <code>oss/</code>.</span></figcaption>
+        </figure>
+      </div>
+      <div class="actions" style="justify-content: flex-start; margin-top: 1.5rem;">
+        <a class="btn-primary" href="#install">Install from source</a>
+        <a class="btn-secondary" href="../LICENSE">Read the MIT license</a>
+      </div>
+      <p class="note">Clone the repo and run <code>swift run hangprobe ui</code>. Optional signed artifacts via <code>scripts/release-macos.sh</code>.</p>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow">Compare</span>
+        <h2>The desk, not the fleet.</h2>
+        <p>Instruments needs a document that is already recording. A fleet tool needs a device in someone else's hand.</p>
+      </div>
+      <div class="scroller">
+        <div class="table-wrap">
+          <div class="rail" aria-hidden="true"></div>
+          <table>
+            <thead>
+              <tr><th></th><th>Hangprobe</th><th>A stitched stack</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Frozen screen, no document open</td><td><span class="disc yes" aria-hidden="true">✓</span> One sample</td><td><span class="disc no" aria-hidden="true">○</span> Open Time Profiler</td></tr>
+              <tr><td>Exit 1 when the main thread is hung</td><td><span class="disc yes">✓</span> <code>hangprobe probe</code></td><td><span class="disc no">○</span> No script gate</td></tr>
+              <tr><td>Android emulator or phone over adb</td><td><span class="disc yes">✓</span> Same report</td><td><span class="disc no">○</span> <code>sample</code> cannot see it</td></tr>
+              <tr><td>Nothing linked into the app</td><td><span class="disc yes">✓</span> Local only</td><td><span class="disc yes">✓</span> Instruments is the same</td></tr>
+              <tr><td>The view tree</td><td><span class="disc no">○</span> Not this tool</td><td><span class="disc yes">✓</span> Lookin and Reveal</td></tr>
+              <tr><td>Hang rate on a physical iPhone</td><td><span class="disc no">○</span> Not on this Mac</td><td><span class="disc yes">✓</span> Organizer and Sentry</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="shell">
+      <div class="install">
+        <div>
+          <h2>Install on your Mac in one command.</h2>
+          <ul class="check">
+            <li>macOS 14 or newer</li>
+            <li>MIT · no account · no license keys</li>
+            <li>Full desk, CLI, MCP, inbox, and gate</li>
+            <li>Builds from source (Gatekeeper-safe)</li>
+            <li>Privacy: local-only · <a href="../PRIVACY.md">PRIVACY.md</a></li>
+          </ul>
+          <div class="actions" style="justify-content: flex-start;">
+            <a class="btn-primary" href="https://github.com/machugram/hangprobe">GitHub</a>
+            <a class="btn-secondary" href="../README.md">View docs</a>
+          </div>
+          <p class="note">Prefer Homebrew: <code>brew install --HEAD --formula https://raw.githubusercontent.com/machugram/hangprobe/main/Formula/hangprobe.rb</code>. Or <code>curl -fsSL https://raw.githubusercontent.com/machugram/hangprobe/main/scripts/install.sh | bash</code>.</p>
+        </div>
+        <div class="chrome">
+          <div class="barrow">
+            <i class="dot"></i><i class="dot"></i><i class="dot"></i>
+            <button class="pane-tab" role="tab" aria-selected="true" aria-controls="pane-ui">ui</button>
+            <button class="pane-tab" role="tab" aria-selected="false" aria-controls="pane-probe">probe</button>
+            <button class="pane-tab" role="tab" aria-selected="false" aria-controls="pane-mcp">mcp</button>
+          </div>
+          <div class="pane on" id="pane-ui" role="tabpanel"><pre><span class="p">$</span> curl -fsSL https://raw.githubusercontent.com/machugram/hangprobe/main/scripts/install.sh | bash
+<span class="p">$</span> hangprobe ui</pre></div>
+          <div class="pane" id="pane-probe" role="tabpanel" hidden><pre><span class="p">$</span> hangprobe probe Finder
+<span class="p">$</span> hangprobe watch Finder
+<span class="p">$</span> hangprobe diff Finder</pre></div>
+          <div class="pane" id="pane-mcp" role="tabpanel" hidden><pre><span class="p">$</span> hangprobe mcp
+
+<span class="p">#</span> one tool
+probe_hang</pre></div>
+          <p class="hint">A hung probe exits 1. A probe error exits 2.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="shell">
+      <div class="head">
+        <span class="eyebrow">FAQ</span>
+        <h2>What it will not do.</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Does it link a framework into the app? <span class="plus" aria-hidden="true"></span></summary>
+          <p>No. On a Mac or the Simulator it runs <code>/usr/bin/sample</code>. On Android it reads a live dump over <code>adb</code>. Nothing is added to the binary under test.</p>
+        </details>
+        <details>
+          <summary>Can it see a physical iPhone? <span class="plus" aria-hidden="true"></span></summary>
+          <p>No. That process is not on this Mac. On-device Hang Detection and MetricKit cover the phone. Hangprobe does not grow a device-side agent to chase it.</p>
+        </details>
+        <details>
+          <summary>Why is the threshold 250 ms? <span class="plus" aria-hidden="true"></span></summary>
+          <p>That is Apple's floor for a hang. Android's input timeout is about 5 seconds. A live Android dump that is stuck is not an ANR, and an ANR trace is labeled as one.</p>
+        </details>
+        <details>
+          <summary>Does sampling pause the app? <span class="plus" aria-hidden="true"></span></summary>
+          <p>Yes. A one second probe pauses the process for about a second, longer while symbols are written. <code>hangprobe worst</code> samples for 10 seconds. Watch stops after the first hang so it does not sample forever.</p>
+        </details>
+        <details>
+          <summary>Where does the report go? <span class="plus" aria-hidden="true"></span></summary>
+          <p>It stays on this Mac. History is under Application Support, for the before and after. Nothing is uploaded.</p>
+        </details>
+        <details>
+          <summary>Is it open source? <span class="plus" aria-hidden="true"></span></summary>
+          <p>Yes. The whole product is MIT — desk studio, CLI, MCP, inbox, gate, and device watchdogs. No license keys.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" id="start">
+    <h2>Open the window. Or run the command.</h2>
+    <p>The same core answers the button and <code>probe_hang</code>.</p>
+    <div class="actions">
+      <a class="btn-primary" href="https://github.com/machugram/hangprobe">View on GitHub</a>
+      <a class="btn-secondary" href="../README.md">View docs</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    <div class="foot">
+      <div>
+        <h2>Hangprobe</h2>
+        <p class="blurb">A local probe for a main thread that stopped answering. Nothing is linked in. Nothing leaves the Mac.</p>
+      </div>
+      <div>
+        <h3>Product</h3>
+        <a href="#stage">Report</a>
+        <a href="#features">Watch and diff</a>
+        <a href="#compare">Compare</a>
+      </div>
+      <div>
+        <h3>Docs</h3>
+        <a href="../README.md">README</a>
+        <a href="#install">Commands</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div>
+        <h3>Project</h3>
+        <a href="#source">Source on this Mac</a>
+        <a href="../LICENSE">License</a>
+        <a href="#install">v0.1.0</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>© 2026 Hangprobe contributors</span>
+      <a href="#install">v0.1.0</a>
+    </div>
+    <div class="mark" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+  </div>
+</footer>
+<script>
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function select(buttons, panels, index) {
+  buttons.forEach((button, i) => {
+    const on = i === index;
+    button.setAttribute("aria-selected", on ? "true" : "false");
+    button.tabIndex = on ? 0 : -1;
+    const panel = panels[i];
+    panel.classList.toggle("on", on);
+    panel.hidden = !on;
+  });
+}
+function wire(buttons, panels) {
+  buttons.forEach((button, index) => {
+    button.addEventListener("click", () => select(buttons, panels, index));
+    button.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      const next = event.key === "ArrowRight" ? (index + 1) % buttons.length : (index + buttons.length - 1) % buttons.length;
+      buttons[next].focus();
+      select(buttons, panels, next);
+    });
+  });
+}
+wire(
+  [...document.querySelectorAll(".notch .tab")],
+  [...document.querySelectorAll(".frame .shot")]
+);
+wire(
+  [...document.querySelectorAll(".pane-tab")],
+  [...document.querySelectorAll(".install .pane")]
+);
+const menu = document.querySelector(".icon-btn");
+const drawer = document.getElementById("drawer");
+menu.addEventListener("click", () => {
+  const open = drawer.classList.toggle("open");
+  menu.setAttribute("aria-expanded", open ? "true" : "false");
+  menu.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+});
+drawer.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => {
+  drawer.classList.remove("open");
+  menu.setAttribute("aria-expanded", "false");
+}));
+if (reduced) document.documentElement.style.scrollBehavior = "auto";
+</script>
+</body>
+</html>

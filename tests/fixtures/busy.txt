@@ -1,0 +1,23 @@
+Analysis of sampling python3 (pid 56151) every 10 milliseconds
+Call graph:
+    92 Thread_60615089   DispatchQueue_1: com.apple.main-thread  (serial)
+      92 start  (in dyld) + 6992  [0x18c36c4e4]
+        92 Py_BytesMain  (in libpython3.13.dylib) + 36  [0x10266f06c]
+          92 pymain_main  (in libpython3.13.dylib) + 468  [0x10266f24c]
+            92 Py_RunMain  (in libpython3.13.dylib) + 796  [0x1026b7020]
+              92 _PyRun_SimpleStringFlagsWithName  (in libpython3.13.dylib) + 280  [0x10271388c]
+                92 run_mod.llvm.8741018417077672401  (in libpython3.13.dylib) + 148  [0x1025fb62c]
+                  92 run_eval_code_obj  (in libpython3.13.dylib) + 132  [0x1025fc0ac]
+                    92 PyEval_EvalCode  (in libpython3.13.dylib) + 132  [0x1025f4e8c]
+                      80 _PyEval_EvalFrameDefault  (in libpython3.13.dylib) + 77036  [0x102502474]
+                      + 80 cfunction_vectorcall_NOARGS.llvm.17051432353746891891  (in libpython3.13.dylib) + 100  [0x1027b955c]
+                      +   74 time_time  (in libpython3.13.dylib) + 28  [0x102dd5c4c]
+                      +   ! 74 clock_gettime  (in libsystem_c.dylib) + 256  [0x18c5d3e24]
+                      +   !   73 gettimeofday  (in libsystem_c.dylib) + 56  [0x18c5cbdc0]
+                      +   !   : 71 __commpage_gettimeofday_internal  (in libsystem_kernel.dylib) + 44  [0x18c6f5c24]
+                      +   !   : | 71 mach_absolute_time  (in libsystem_kernel.dylib) + 108,112  [0x18c6f410c,0x18c6f4110]
+                      +   !   : 2 __commpage_gettimeofday_internal  (in libsystem_kernel.dylib) + 80  [0x18c6f5c48]
+                      +   !   1 gettimeofday  (in libsystem_c.dylib) + 56  [0x18c5cbdc0]
+                      +   6 time_time  (in libpython3.13.dylib) + 8,112,...  [0x102dd5c38,0x102dd5ca0,...]
+                      12 _PyEval_EvalFrameDefault  (in libpython3.13.dylib) + 77152,151172,...  [0x1025024e8,0x10251460c,...]
+

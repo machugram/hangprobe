@@ -1,0 +1,17 @@
+Analysis of sampling python3 (pid 56262) every 10 milliseconds
+Call graph:
+    92 Thread_60615502   DispatchQueue_1: com.apple.main-thread  (serial)
+      92 start  (in dyld) + 6992  [0x18c36c4e4]
+        92 Py_BytesMain  (in libpython3.13.dylib) + 36  [0x105c9706c]
+          92 pymain_main  (in libpython3.13.dylib) + 468  [0x105c9724c]
+            92 Py_RunMain  (in libpython3.13.dylib) + 796  [0x105cdf020]
+              92 _PyRun_SimpleStringFlagsWithName  (in libpython3.13.dylib) + 280  [0x105d3b88c]
+                92 run_mod.llvm.8741018417077672401  (in libpython3.13.dylib) + 148  [0x105c2362c]
+                  92 run_eval_code_obj  (in libpython3.13.dylib) + 132  [0x105c240ac]
+                    92 PyEval_EvalCode  (in libpython3.13.dylib) + 132  [0x105c1ce8c]
+                      92 _PyEval_EvalFrameDefault  (in libpython3.13.dylib) + 41860  [0x105b21b0c]
+                        92 cfunction_vectorcall_O.llvm.17051432353746891891  (in libpython3.13.dylib) + 104  [0x105caee3c]
+                          92 time_sleep  (in libpython3.13.dylib) + 212  [0x105e8e118]
+                            92 nanosleep  (in libsystem_c.dylib) + 220  [0x18c5d2cc0]
+                              92 __semwait_signal  (in libsystem_kernel.dylib) + 8  [0x18c6f7308]
+

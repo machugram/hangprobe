@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hangprobe.dev/schema/hang-report.schema.json",
+  "title": "Hangprobe Canonical HangReport",
+  "description": "MIT open-edge wire format emitted by HangprobeKit (iOS/macOS) and HangprobeAndroidWatchdog (Android) to `POST /v1/hangs`.",
+  "type": "object",
+  "required": [
+    "hung",
+    "kind",
+    "main_gap_ms",
+    "gap_at_least",
+    "busy_ms",
+    "blocked_ms",
+    "event_wait_ms",
+    "window_ms",
+    "threshold_ms",
+    "samples",
+    "top",
+    "stack"
+  ],
+  "properties": {
+    "hung": { "type": "boolean" },
+    "kind": { "type": "string", "enum": ["busy", "blocked", "responsive"] },
+    "main_gap_ms": { "type": "integer", "minimum": 0 },
+    "gap_at_least": { "type": "boolean" },
+    "busy_ms": { "type": "integer", "minimum": 0 },
+    "blocked_ms": { "type": "integer", "minimum": 0 },
+    "event_wait_ms": { "type": "integer", "minimum": 0 },
+    "window_ms": { "type": "integer", "minimum": 0 },
+    "threshold_ms": { "type": "integer", "minimum": 50 },
+    "samples": { "type": "integer", "minimum": 1 },
+    "top": { "type": "string" },
+    "stack": { "type": "array", "items": { "type": "string" } },
+    "pid": { "type": "integer" },
+    "app": { "type": "string" },
+    "bundle_id": { "type": "string" },
+    "where": { "type": "string", "enum": ["mac", "simulator", "android", "ios"] },
+    "note": { "type": "string" },
+    "context": {
+      "type": "object",
+      "properties": {
+        "commit": { "type": "string" },
+        "screen": { "type": "string" },
+        "device": { "type": "string" },
+        "os": { "type": "string" },
+        "arch": { "type": "string" },
+        "load_address": { "type": "string" },
+        "binary_uuid": { "type": "string" },
+        "captured_at": { "type": "string" }
+      }
+    }
+  }
+}

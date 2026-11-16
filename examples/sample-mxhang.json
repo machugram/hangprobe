@@ -1,0 +1,44 @@
+{
+  "timeStampEnd": "2026-11-12T23:35:00Z",
+  "hangDiagnostics": [
+    {
+      "hangDuration": "640 ms",
+      "diagnosticMetaData": {
+        "bundleIdentifier": "com.awtsyde.mobile",
+        "appBuildVersion": "8f3c12a",
+        "deviceType": "iPhone17,1",
+        "osVersion": "iOS 20.1",
+        "platformArchitecture": "arm64e",
+        "regionFormat": "SportProfileEditorView"
+      },
+      "callStackTree": {
+        "callStacks": [
+          {
+            "threadAttributed": true,
+            "callStackRootFrames": [
+              {
+                "binaryName": "dyld",
+                "symbol": "start",
+                "sampleCount": 64,
+                "subFrames": [
+                  {
+                    "binaryName": "UIKitCore",
+                    "symbol": "-[UIView layoutSubviews]",
+                    "sampleCount": 64,
+                    "subFrames": [
+                      {
+                        "binaryName": "Awtsyde",
+                        "symbol": "SportProfileEditorView.body.getter",
+                        "sampleCount": 64
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
